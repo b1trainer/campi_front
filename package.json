@@ -15,7 +15,6 @@
     "@fontsource/roboto": "^5.2.5",
     "@mui/icons-material": "^5.0.0",
     "@mui/material": "^5.10.8",
-    "@rollup/rollup-win32-x64-msvc": "^4.35.0",
     "lodash": "^4.17.21",
     "notistack": "^3.0.2",
     "react": "^18.0.0",
