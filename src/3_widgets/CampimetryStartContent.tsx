@@ -26,7 +26,7 @@ const CampimetryStartContent: React.FC<ICampimetryStartContent> = (props) => {
             </Typography>
 
             <Typography variant='body1' paragraph sx={{ mb: 3 }}>
-                Пожалуйста, перед началом тестирования полностью заполните форму
+                Пожалуйста, перед началом тестирования заполните форму
             </Typography>
 
             <Box component='form'>
@@ -96,6 +96,10 @@ const CampimetryStartContent: React.FC<ICampimetryStartContent> = (props) => {
                     </Grid>
                 </Grid>
             </Box>
+
+            <Typography variant='body2' style={{ fontWeight: 600 }} paragraph sx={{ mt: 3 }}>
+                Вся собираемая информация обезличена и строго конфиденциальна
+            </Typography>
         </Container>
     );
 };

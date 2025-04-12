@@ -5,7 +5,7 @@ import { LinearProgressWithLabel } from '../3_widgets/LinearProgress';
 import { ICONS, TEST_CONFIGURATION } from './config';
 import { ConfirmContext } from '../6_shared/ConfirmProvider';
 import { useNavigate } from 'react-router';
-import { UserContext } from '../6_shared/UserProvider';
+import { DEFAULT_DATA_START, UserContext } from '../6_shared/UserProvider';
 import { UserDataDecrease } from '../6_shared/types';
 
 const Test2Text = () => (
@@ -28,12 +28,7 @@ const EndText = () => (
 );
 
 const CampimetryTest_2: FC = () => {
-    const { userId } = useContext(UserContext);
-
-    const [userData, setUserData] = useState<UserDataDecrease>({
-        userId: userId,
-        data: [],
-    });
+    const { userId, useSendData, useSetData } = useContext(UserContext);
 
     const navigate = useNavigate();
     const { confirm } = useContext(ConfirmContext);
@@ -57,7 +52,7 @@ const CampimetryTest_2: FC = () => {
         let changedHue = 0;
         let changedLight = 0;
 
-        if (TEST_CONFIGURATION[currentIndex].changedValue === 'hue') changedHue = 20;
+        if (TEST_CONFIGURATION[currentIndex].changedValue === 'hue') changedHue = 30;
         else changedLight = 20;
 
         setCurrentHue(TEST_CONFIGURATION[currentIndex].hue + changedHue);
@@ -92,22 +87,21 @@ const CampimetryTest_2: FC = () => {
     };
 
     const handleNextColor = () => {
-        const currentMeasure = {
-            stimul: stimul,
-            H: TEST_CONFIGURATION[currentIndex].hue,
-            ['H-']: currentHue,
-            ['dH-']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
-            ['S-']: currentSaturation,
-            ['dS-']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
-            ['L-']: currentLightness,
-            ['dL-']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
-            ['t-']: new Date().getTime() - startTime,
-        };
-
-        setUserData((prev) => ({
-            ...prev,
-            data: [...prev.data, currentMeasure],
-        }));
+        useSetData({
+            dataDecrease: [
+                {
+                    stimul: stimul,
+                    H: TEST_CONFIGURATION[currentIndex].hue,
+                    ['H-']: currentHue,
+                    ['dH-']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
+                    ['S-']: currentSaturation,
+                    ['dS-']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
+                    ['L-']: currentLightness,
+                    ['dL-']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
+                    ['t-']: new Date().getTime() - startTime,
+                },
+            ],
+        });
 
         setProgress((prev) => prev + 100 / TEST_CONFIGURATION.length);
         setCurrentIndex((prev) => (prev + 1) % TEST_CONFIGURATION.length);
@@ -117,15 +111,17 @@ const CampimetryTest_2: FC = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            confirm({ content: <Test2Text />, confirmationText: 'Начать' }).then(() => setStartTime(new Date().getTime()));
+            confirm({ content: <Test2Text />, confirmationText: 'Начать' }).then(() =>
+                setStartTime(new Date().getTime())
+            );
         }, 500);
     }, []);
 
     useEffect(() => {
-        if (currentIndex === TEST_CONFIGURATION.length - 1) {
+        if (currentIndex === 3) {
             confirm({ content: <EndText />, confirmationText: 'Завершить' }).then(() => {
-                // Sending second part of testing user
-                console.log(userData);
+                useSendData();
+                useSetData(DEFAULT_DATA_START);
                 navigate('/start');
             });
         }
@@ -164,8 +160,8 @@ const CampimetryTest_2: FC = () => {
                     >
                         {ICONS[targetImageIndex].icon({
                             style: {
-                                width: '300px',
-                                height: '300px',
+                                width: '250px',
+                                height: '250px',
                                 borderRadius: 2,
                                 objectFit: 'cover',
                                 color: background,
@@ -184,7 +180,6 @@ const CampimetryTest_2: FC = () => {
                         >
                             <Remove fontSize='large' sx={{ color: textColor }} />
                         </IconButton>
-
                         <IconButton
                             onClick={() => handleChange(1)}
                             size='large'
@@ -192,6 +187,11 @@ const CampimetryTest_2: FC = () => {
                                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                 '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
                             }}
+                            disabled={
+                                TEST_CONFIGURATION[currentIndex].changedValue === 'hue'
+                                    ? currentHue === TEST_CONFIGURATION[currentIndex].hue + 30
+                                    : currentLightness === TEST_CONFIGURATION[currentIndex].lightness + 20
+                            }
                         >
                             <Add fontSize='large' sx={{ color: textColor }} />
                         </IconButton>

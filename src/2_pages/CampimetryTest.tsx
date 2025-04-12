@@ -9,10 +9,10 @@ import { useSnackbar } from 'notistack';
 import createSnackbarAction from '../6_shared/createSnackbarAction';
 import { useNavigate } from 'react-router';
 import { UserContext } from '../6_shared/UserProvider';
-import { UserDataIncrease } from '../6_shared/types';
+import CampimetryStartContent_1 from '../3_widgets/CampimetryStartContent_1';
 
 const CampimetryTest: FC = () => {
-    const { userId } = useContext(UserContext);
+    const { useSetData } = useContext(UserContext);
 
     const [startData, setStartData] = useState({
         age: '',
@@ -20,11 +20,6 @@ const CampimetryTest: FC = () => {
         cataract: '',
         colorWork: '',
         neurologyDisease: '',
-    });
-
-    const [userData, setUserData] = useState<UserDataIncrease>({
-        userId: userId,
-        data: [],
     });
 
     const navigate = useNavigate();
@@ -82,22 +77,22 @@ const CampimetryTest: FC = () => {
     };
 
     const handleNextColor = () => {
-        const currentMeasure = {
-            stimul: stimul,
-            H: TEST_CONFIGURATION[currentIndex].hue,
-            ['H+']: currentHue,
-            ['dH+']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
-            ['S+']: currentSaturation,
-            ['dS+']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
-            ['L+']: currentLightness,
-            ['dL+']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
-            ERR: errors,
-            ['t+']: new Date().getTime() - startTime,
-        };
-        setUserData((prev) => ({
-            ...prev,
-            data: [...prev.data, currentMeasure],
-        }));
+        useSetData({
+            dataIncrease: [
+                {
+                    stimul: stimul,
+                    H: TEST_CONFIGURATION[currentIndex].hue,
+                    ['H+']: currentHue,
+                    ['dH+']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
+                    ['S+']: currentSaturation,
+                    ['dS+']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
+                    ['L+']: currentLightness,
+                    ['dL+']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
+                    ERR: errors,
+                    ['t+']: new Date().getTime() - startTime,
+                },
+            ],
+        });
 
         setProgress((prev) => prev + 100 / TEST_CONFIGURATION.length);
         setCurrentIndex((prev) => (prev + 1) % TEST_CONFIGURATION.length);
@@ -108,19 +103,22 @@ const CampimetryTest: FC = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            confirm({
-                content: <CampimetryStartContent setData={setStartData} />,
-                confirmationText: 'Начать',
-            }).then(() => setStartTime(new Date().getTime()));
-        }, 500);
+            confirm({ content: <CampimetryStartContent_1 />, confirmationText: 'Далее' })
+                .then(() =>
+                    setTimeout(() => {
+                        confirm({
+                            content: <CampimetryStartContent setData={setStartData} />,
+                            confirmationText: 'Начать',
+                        });
+                    }, 400)
+                )
+                .then(() => setStartTime(new Date().getTime()));
+        }, 400);
     }, []);
 
     useEffect(() => {
         if (currentIndex === TEST_CONFIGURATION.length - 1) {
-            // Sending first part of testing user
-            console.log('startData', { ...startData, userId: userId });
-
-            console.log('userData', userData);
+            useSetData(startData);
             navigate('/test_2');
         }
     }, [currentIndex]);
@@ -128,10 +126,11 @@ const CampimetryTest: FC = () => {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const addError = () => {
         setErrors((prev) => prev + 1);
+        setSelectedImage(null);
         enqueueSnackbar(`Попробуйте снова!`, {
-            persist: true,
             variant: 'warning',
             action: createSnackbarAction(closeSnackbar),
+            autoHideDuration: 2500,
         });
     };
 
@@ -170,8 +169,8 @@ const CampimetryTest: FC = () => {
                     >
                         {ICONS[targetImageIndex].icon({
                             style: {
-                                width: '300px',
-                                height: '300px',
+                                width: '250px',
+                                height: '250px',
                                 borderRadius: 2,
                                 objectFit: 'cover',
                                 color: background,
@@ -234,6 +233,7 @@ const CampimetryTest: FC = () => {
                             variant='contained'
                             onClick={isCorrectImage ? handleNextColor : addError}
                             endIcon={<ArrowForward />}
+                            disabled={!selectedImage}
                             sx={{
                                 px: 4,
                                 bgcolor: 'rgba(255, 255, 255, 0.2)',
