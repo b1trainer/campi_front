@@ -1,21 +1,16 @@
 export type BtnColor = 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
 
-export interface User {
-    age: string;
-    visionLevel: string;
-}
-
 export type DataTypeIncrease = {
-    stimul: number;
-    H: number;
-    ['H+']: number;
-    ['dH+']: number;
-    ['S+']: number;
-    ['dS+']: number;
-    ['L+']: number;
-    ['dL+']: number;
-    ERR: number;
-    ['t+']: number;
+    stimulus: number;
+    hue: number;
+    hueIncrease: number;
+    hueDiff: number;
+    saturation: number;
+    saturationDiff: number;
+    lightness: number;
+    lightnessDiff: number;
+    errors: number;
+    testTime: number;
 };
 
 export type UserData = {
@@ -33,15 +28,15 @@ export type UserDataIncrease = {
 };
 
 export type DataTypeDecrease = {
-    stimul: number;
-    H: number;
-    ['H-']: number;
-    ['dH-']: number;
-    ['S-']: number;
-    ['dS-']: number;
-    ['L-']: number;
-    ['dL-']: number;
-    ['t-']: number;
+    stimulus: number;
+    hue: number;
+    hueDecrease: number;
+    hueDiff: number;
+    saturation: number;
+    saturationDiff: number;
+    lightness: number;
+    lightnessDiff: number;
+    testTime: number;
 };
 
 export type UserDataDecrease = {

@@ -61,8 +61,8 @@ const CampimetryStartContent: React.FC<ICampimetryStartContent> = (props) => {
                                 label='Катаракта'
                                 onChange={(e) => setCataract(e.target.value)}
                             >
-                                <MenuItem value='cataract'>Есть</MenuItem>
-                                <MenuItem value='no_cataract'>Нет</MenuItem>
+                                <MenuItem value='1'>Есть</MenuItem>
+                                <MenuItem value='0'>Нет</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -75,8 +75,8 @@ const CampimetryStartContent: React.FC<ICampimetryStartContent> = (props) => {
                                 label='Работа с цветом'
                                 onChange={(e) => setColorWork(e.target.value)}
                             >
-                                <MenuItem value='colorWork'>Да</MenuItem>
-                                <MenuItem value='no_colorWork'>Нет</MenuItem>
+                                <MenuItem value='1'>Да</MenuItem>
+                                <MenuItem value='0'>Нет</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>
@@ -89,8 +89,8 @@ const CampimetryStartContent: React.FC<ICampimetryStartContent> = (props) => {
                                 label='Неврологические заболевания'
                                 onChange={(e) => setNeurologyDisease(e.target.value)}
                             >
-                                <MenuItem value='neurology_disease'>Есть</MenuItem>
-                                <MenuItem value='no_neurology_disease'>Нет</MenuItem>
+                                <MenuItem value='1'>Есть</MenuItem>
+                                <MenuItem value='0'>Нет</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid>

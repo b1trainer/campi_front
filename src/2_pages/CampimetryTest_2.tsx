@@ -6,7 +6,9 @@ import { ICONS, TEST_CONFIGURATION } from './config';
 import { ConfirmContext } from '../6_shared/ConfirmProvider';
 import { useNavigate } from 'react-router';
 import { DEFAULT_DATA_START, UserContext } from '../6_shared/UserProvider';
-import { UserDataDecrease } from '../6_shared/types';
+import { DataTypeDecrease } from '../6_shared/types';
+import { sendDecreaseData } from '../4_features/sendDecreaseData';
+import { random } from 'lodash';
 
 const Test2Text = () => (
     <>
@@ -28,7 +30,7 @@ const EndText = () => (
 );
 
 const CampimetryTest_2: FC = () => {
-    const { userId, useSendData, useSetData } = useContext(UserContext);
+    const { userId, useSetData } = useContext(UserContext);
 
     const navigate = useNavigate();
     const { confirm } = useContext(ConfirmContext);
@@ -52,8 +54,8 @@ const CampimetryTest_2: FC = () => {
         let changedHue = 0;
         let changedLight = 0;
 
-        if (TEST_CONFIGURATION[currentIndex].changedValue === 'hue') changedHue = 30;
-        else changedLight = 20;
+        if (TEST_CONFIGURATION[currentIndex].changedValue === 'hue') changedHue = 15 + random(5, 10);
+        else changedLight = 15 + random(5, 10);
 
         setCurrentHue(TEST_CONFIGURATION[currentIndex].hue + changedHue);
         setCurrentSaturation(TEST_CONFIGURATION[currentIndex].saturation);
@@ -87,21 +89,20 @@ const CampimetryTest_2: FC = () => {
     };
 
     const handleNextColor = () => {
-        useSetData({
-            dataDecrease: [
-                {
-                    stimul: stimul,
-                    H: TEST_CONFIGURATION[currentIndex].hue,
-                    ['H-']: currentHue,
-                    ['dH-']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
-                    ['S-']: currentSaturation,
-                    ['dS-']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
-                    ['L-']: currentLightness,
-                    ['dL-']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
-                    ['t-']: new Date().getTime() - startTime,
-                },
-            ],
-        });
+        const measure: DataTypeDecrease = {
+            stimulus: stimul,
+            hue: TEST_CONFIGURATION[currentIndex].hue,
+            hueDecrease: currentHue,
+            hueDiff: currentHue - TEST_CONFIGURATION[currentIndex].hue,
+            saturation: currentSaturation,
+            saturationDiff: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
+            lightness: currentLightness,
+            lightnessDiff: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
+            testTime: new Date().getTime() - startTime,
+        };
+
+        useSetData({ dataDecrease: [measure] });
+        sendDecreaseData(userId, measure);
 
         setProgress((prev) => prev + 100 / TEST_CONFIGURATION.length);
         setCurrentIndex((prev) => (prev + 1) % TEST_CONFIGURATION.length);
@@ -118,9 +119,9 @@ const CampimetryTest_2: FC = () => {
     }, []);
 
     useEffect(() => {
-        if (currentIndex === 3) {
+        if (currentIndex === TEST_CONFIGURATION.length - 1) {
+            // Обработка результатов для пользователя
             confirm({ content: <EndText />, confirmationText: 'Завершить' }).then(() => {
-                useSendData();
                 useSetData(DEFAULT_DATA_START);
                 navigate('/start');
             });

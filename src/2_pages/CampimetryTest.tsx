@@ -10,16 +10,19 @@ import createSnackbarAction from '../6_shared/createSnackbarAction';
 import { useNavigate } from 'react-router';
 import { UserContext } from '../6_shared/UserProvider';
 import CampimetryStartContent_1 from '../3_widgets/CampimetryStartContent_1';
+import { DataTypeIncrease } from '../6_shared/types';
+import { sendIncreaseData } from '../4_features/sendIncreaseData';
+import { sendUserData } from '../4_features/sendUserData';
 
 const CampimetryTest: FC = () => {
-    const { useSetData } = useContext(UserContext);
+    const { useSetData, userId } = useContext(UserContext);
 
     const [startData, setStartData] = useState({
         age: '',
-        sex: '',
         cataract: '',
         colorWork: '',
         neurologyDisease: '',
+        sex: '',
     });
 
     const navigate = useNavigate();
@@ -77,22 +80,21 @@ const CampimetryTest: FC = () => {
     };
 
     const handleNextColor = () => {
-        useSetData({
-            dataIncrease: [
-                {
-                    stimul: stimul,
-                    H: TEST_CONFIGURATION[currentIndex].hue,
-                    ['H+']: currentHue,
-                    ['dH+']: currentHue - TEST_CONFIGURATION[currentIndex].hue,
-                    ['S+']: currentSaturation,
-                    ['dS+']: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
-                    ['L+']: currentLightness,
-                    ['dL+']: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
-                    ERR: errors,
-                    ['t+']: new Date().getTime() - startTime,
-                },
-            ],
-        });
+        const measure: DataTypeIncrease = {
+            stimulus: stimul,
+            hue: TEST_CONFIGURATION[currentIndex].hue,
+            hueIncrease: currentHue,
+            hueDiff: currentHue - TEST_CONFIGURATION[currentIndex].hue,
+            saturation: currentSaturation,
+            saturationDiff: currentSaturation - TEST_CONFIGURATION[currentIndex].saturation,
+            lightness: currentLightness,
+            lightnessDiff: currentLightness - TEST_CONFIGURATION[currentIndex].lightness,
+            errors: errors,
+            testTime: new Date().getTime() - startTime,
+        };
+
+        useSetData({ dataIncrease: [measure] });
+        sendIncreaseData(userId, measure);
 
         setProgress((prev) => prev + 100 / TEST_CONFIGURATION.length);
         setCurrentIndex((prev) => (prev + 1) % TEST_CONFIGURATION.length);
@@ -112,13 +114,15 @@ const CampimetryTest: FC = () => {
                         });
                     }, 400)
                 )
-                .then(() => setStartTime(new Date().getTime()));
+                .then(() => {
+                    setStartTime(new Date().getTime());
+                });
         }, 400);
     }, []);
 
     useEffect(() => {
         if (currentIndex === TEST_CONFIGURATION.length - 1) {
-            useSetData(startData);
+            sendUserData({ userId: userId, ...startData });
             navigate('/test_2');
         }
     }, [currentIndex]);
